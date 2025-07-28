@@ -396,3 +396,120 @@ tr:hover {
 .downloadAllBtn:hover {
   background-color: #43a047;
 }
+/* Tablet View (landscape tablets, small laptops) */
+@media (max-width: 1024px) {
+  .dashboard {
+    padding: 1.5rem;
+  }
+
+  .heading {
+    font-size: 1.75rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .resumeLink,
+  .viewBtn {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .resumeBtn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .topBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .sortRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .searchInput {
+    width: 100%;
+            box-sizing: border-box;
+  }
+}
+
+/* Mobile View (phones) */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.85rem;
+    padding: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .topBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .sortRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .sortSelect,
+  .searchInput {
+    width: 100%;
+  }
+
+  .downloadAllBtn {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+.logoutBtn{
+  width: 100%;
+    text-align: center;
+}
+  .resumeLink,
+  .viewBtn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .modalBox {
+    padding: 1.5rem;
+    max-width: 95%;
+  }
+
+  .modalHeader h2 {
+    font-size: 1.3rem;
+  }
+
+  .modalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .longField {
+    grid-column: span 1;
+  }
+}
