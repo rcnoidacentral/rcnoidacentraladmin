@@ -1,8 +1,3 @@
-
-
-
-
-
 import React, { useEffect, useState } from "react";
 import styles from "./Dashboard.module.css";
 import { collection, getDocs } from "firebase/firestore";
@@ -12,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import ContactQueries from "../../components/ContactQueries/ContactQueries";
 
 const Dashboard = () => {
   const [applications, setApplications] = useState([]);
@@ -34,13 +30,13 @@ const Dashboard = () => {
       toast.error("❌ Logout failed", { id: toastId });
     }
   };
-const programNameMap = {
-  "flexi-mou": "Flexi MOU",
-  "b-voc": "B.Voc",
-  "d-voc": "D.Voc",
-  "nats": "NATS",
-  "naps": "NAPS",
-};
+  const programNameMap = {
+    "flexi-mou": "Flexi MOU",
+    "b-voc": "B.Voc",
+    "d-voc": "D.Voc",
+    nats: "NATS",
+    naps: "NAPS",
+  };
 
   const handleDownloadAll = async () => {
     const zip = new JSZip();
@@ -68,53 +64,53 @@ const programNameMap = {
     fetchData();
   }, []);
 
-useEffect(() => {
-  let data = [...applications];
+  useEffect(() => {
+    let data = [...applications];
 
-  if (search.trim() !== "") {
-    data = data.filter((app) =>
-      Object.values(app).some((val) =>
-        String(val).toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }
+    if (search.trim() !== "") {
+      data = data.filter((app) =>
+        Object.values(app).some((val) =>
+          String(val).toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
 
-  // Always sort by readable program name
-  data.sort((a, b) => {
-    const nameA = programNameMap[a.selectedProgram] || "";
-    const nameB = programNameMap[b.selectedProgram] || "";
-    return nameA.localeCompare(nameB);
-  });
+    // Always sort by readable program name
+    data.sort((a, b) => {
+      const nameA = programNameMap[a.selectedProgram] || "";
+      const nameB = programNameMap[b.selectedProgram] || "";
+      return nameA.localeCompare(nameB);
+    });
 
-  setFilteredApps(data);
-}, [applications, search]);
-useEffect(() => {
-  const programOrder = ["flexi-mou", "b-voc", "d-voc", "nats", "naps"];
+    setFilteredApps(data);
+  }, [applications, search]);
+  useEffect(() => {
+    const programOrder = ["flexi-mou", "b-voc", "d-voc", "nats", "naps"];
 
-  let data = [...applications];
+    let data = [...applications];
 
-  if (search.trim() !== "") {
-    data = data.filter((app) =>
-      Object.values(app).some((val) =>
-        String(val).toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }
+    if (search.trim() !== "") {
+      data = data.filter((app) =>
+        Object.values(app).some((val) =>
+          String(val).toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
 
-  // Apply program filter if selected
-  if (selectedProgram) {
-    data = data.filter((app) => app.selectedProgram === selectedProgram);
-  }
+    // Apply program filter if selected
+    if (selectedProgram) {
+      data = data.filter((app) => app.selectedProgram === selectedProgram);
+    }
 
-  // Sort by predefined program order
-  data.sort((a, b) => {
-    const indexA = programOrder.indexOf(a.selectedProgram);
-    const indexB = programOrder.indexOf(b.selectedProgram);
-    return indexA - indexB;
-  });
+    // Sort by predefined program order
+    data.sort((a, b) => {
+      const indexA = programOrder.indexOf(a.selectedProgram);
+      const indexB = programOrder.indexOf(b.selectedProgram);
+      return indexA - indexB;
+    });
 
-  setFilteredApps(data);
-}, [applications, search, selectedProgram]);
+    setFilteredApps(data);
+  }, [applications, search, selectedProgram]);
 
   return (
     <div className={styles.dashboard}>
@@ -138,23 +134,22 @@ useEffect(() => {
         className={styles.searchInput}
       />
 
-    <div className={styles.sortRow}>
-  <label htmlFor="programFilter">Filter by Program:</label>
-  <select
-    id="programFilter"
-    value={selectedProgram}
-    onChange={(e) => setSelectedProgram(e.target.value)}
-    className={styles.sortSelect}
-  >
-    <option value="">All Programs</option>
-    <option value="flexi-mou">Flexi MOU</option>
-    <option value="b-voc">B.Voc</option>
-    <option value="d-voc">D.Voc</option>
-    <option value="nats">NATS</option>
-    <option value="naps">NAPS</option>
-  </select>
-</div>
-
+      <div className={styles.sortRow}>
+        <label htmlFor="programFilter">Filter by Program:</label>
+        <select
+          id="programFilter"
+          value={selectedProgram}
+          onChange={(e) => setSelectedProgram(e.target.value)}
+          className={styles.sortSelect}
+        >
+          <option value="">All Programs</option>
+          <option value="flexi-mou">Flexi MOU</option>
+          <option value="b-voc">B.Voc</option>
+          <option value="d-voc">D.Voc</option>
+          <option value="nats">NATS</option>
+          <option value="naps">NAPS</option>
+        </select>
+      </div>
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
@@ -176,7 +171,9 @@ useEffect(() => {
                 <td>{app.email}</td>
                 <td>{app.phone}</td>
                 <td>{app.city}</td>
-<td>{programNameMap[app.selectedProgram] || app.selectedProgram}</td>
+                <td>
+                  {programNameMap[app.selectedProgram] || app.selectedProgram}
+                </td>
 
                 <td>
                   <a
@@ -204,33 +201,44 @@ useEffect(() => {
       </div>
 
       {selectedApp && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedApp(null)}>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setSelectedApp(null)}
+        >
           <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>
                 {selectedApp.fullName} <span>📄 Application Details</span>
               </h2>
-              <button className={styles.closeBtn} onClick={() => setSelectedApp(null)}>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setSelectedApp(null)}
+              >
                 ✕
               </button>
             </div>
             <div className={styles.modalGrid}>
-              {Object.entries(selectedApp).map(([key, value]) => (
-                key !== "resumeUrl" && (
-                  <div
-                    key={key}
-                    className={styles.fieldBox + (key === "motivation" ? ` ${styles.longField}` : "")}
-                  >
-                    <span><strong>{key}:</strong></span>
-          <p>
-  {typeof value === "object" && value?.seconds
-    ? new Date(value.seconds * 1000).toLocaleString()
-    : String(value)}
-</p>
-
-                  </div>
-                )
-              ))}
+              {Object.entries(selectedApp).map(
+                ([key, value]) =>
+                  key !== "resumeUrl" && (
+                    <div
+                      key={key}
+                      className={
+                        styles.fieldBox +
+                        (key === "motivation" ? ` ${styles.longField}` : "")
+                      }
+                    >
+                      <span>
+                        <strong>{key}:</strong>
+                      </span>
+                      <p>
+                        {typeof value === "object" && value?.seconds
+                          ? new Date(value.seconds * 1000).toLocaleString()
+                          : String(value)}
+                      </p>
+                    </div>
+                  )
+              )}
             </div>
             <div className={styles.modalFooter}>
               <a
@@ -246,6 +254,9 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+
+      <ContactQueries></ContactQueries>
     </div>
   );
 };
