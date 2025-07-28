@@ -1,49 +1,160 @@
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import styles from "./Dashboard.module.css";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { db, auth } from "../../firebaseConfig";
 import { signOut } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
-import { useNavigate } from "react-router-dom"; // already used in Login
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const Dashboard = () => {
-    const [applications, setApplications] = useState([]);
-    const navigate = useNavigate();
-    
-    const [selectedApp, setSelectedApp] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [filteredApps, setFilteredApps] = useState([]);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState("fullName");
+  const [selectedProgram, setSelectedProgram] = useState("");
 
-const handleLogout = async () => {
-  const loggingOut = toast.loading("Logging out...");
-  try {
-    await signOut(auth);
-    toast.success("🔒 Logged out", { id: loggingOut });
-    navigate("/login");
-  } catch (error) {
-    toast.error("❌ Logout failed", { id: loggingOut });
-  }
+  const [sortOrder, setSortOrder] = useState("asc");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const toastId = toast.loading("Logging out...");
+    try {
+      await signOut(auth);
+      toast.success("🔒 Logged out", { id: toastId });
+      navigate("/login");
+    } catch (error) {
+      toast.error("❌ Logout failed", { id: toastId });
+    }
+  };
+const programNameMap = {
+  "flexi-mou": "Flexi MOU",
+  "b-voc": "B.Voc",
+  "d-voc": "D.Voc",
+  "nats": "NATS",
+  "naps": "NAPS",
 };
 
+  const handleDownloadAll = async () => {
+    const zip = new JSZip();
+    const folder = zip.folder("Resumes");
+
+    const fetchAndAdd = async (app) => {
+      const response = await fetch(app.resumeUrl);
+      const blob = await response.blob();
+      const ext = app.resumeUrl.split(".").pop().split("?")[0];
+      const fileName = `${app.fullName.replace(/\s+/g, "_")}_Resume.${ext}`;
+      folder.file(fileName, blob);
+    };
+
+    await Promise.all(applications.map(fetchAndAdd));
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "All_Resumes.zip");
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const snap = await getDocs(collection(db, "applications"));
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setApplications(data);
     };
     fetchData();
   }, []);
 
+useEffect(() => {
+  let data = [...applications];
+
+  if (search.trim() !== "") {
+    data = data.filter((app) =>
+      Object.values(app).some((val) =>
+        String(val).toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }
+
+  // Always sort by readable program name
+  data.sort((a, b) => {
+    const nameA = programNameMap[a.selectedProgram] || "";
+    const nameB = programNameMap[b.selectedProgram] || "";
+    return nameA.localeCompare(nameB);
+  });
+
+  setFilteredApps(data);
+}, [applications, search]);
+useEffect(() => {
+  const programOrder = ["flexi-mou", "b-voc", "d-voc", "nats", "naps"];
+
+  let data = [...applications];
+
+  if (search.trim() !== "") {
+    data = data.filter((app) =>
+      Object.values(app).some((val) =>
+        String(val).toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }
+
+  // Apply program filter if selected
+  if (selectedProgram) {
+    data = data.filter((app) => app.selectedProgram === selectedProgram);
+  }
+
+  // Sort by predefined program order
+  data.sort((a, b) => {
+    const indexA = programOrder.indexOf(a.selectedProgram);
+    const indexB = programOrder.indexOf(b.selectedProgram);
+    return indexA - indexB;
+  });
+
+  setFilteredApps(data);
+}, [applications, search, selectedProgram]);
+
   return (
     <div className={styles.dashboard}>
-        <div className={styles.topBar}>
-  <h1 className={styles.heading}>All Applications</h1>
-  <button className={styles.logoutBtn} onClick={handleLogout}>
-    🔓 Logout
-  </button>
+      <div className={styles.topBar}>
+        <h1 className={styles.heading}>📋 Applications</h1>
+        <div className={styles.buttonGroup}>
+          <button className={styles.downloadAllBtn} onClick={handleDownloadAll}>
+            ⬇️ Download All
+          </button>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            🔓 Logout
+          </button>
+        </div>
+      </div>
+
+      <input
+        type="text"
+        placeholder="Search any field..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className={styles.searchInput}
+      />
+
+    <div className={styles.sortRow}>
+  <label htmlFor="programFilter">Filter by Program:</label>
+  <select
+    id="programFilter"
+    value={selectedProgram}
+    onChange={(e) => setSelectedProgram(e.target.value)}
+    className={styles.sortSelect}
+  >
+    <option value="">All Programs</option>
+    <option value="flexi-mou">Flexi MOU</option>
+    <option value="b-voc">B.Voc</option>
+    <option value="d-voc">D.Voc</option>
+    <option value="nats">NATS</option>
+    <option value="naps">NAPS</option>
+  </select>
 </div>
 
-      <h1 className={styles.heading}>All Applications</h1>
 
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
@@ -59,21 +170,23 @@ const handleLogout = async () => {
             </tr>
           </thead>
           <tbody>
-            {applications.map((app) => (
+            {filteredApps.map((app) => (
               <tr key={app.id}>
                 <td>{app.fullName}</td>
                 <td>{app.email}</td>
                 <td>{app.phone}</td>
                 <td>{app.city}</td>
-                <td>{app.selectedProgram}</td>
+<td>{programNameMap[app.selectedProgram] || app.selectedProgram}</td>
+
                 <td>
                   <a
                     href={app.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    download
                     className={styles.resumeLink}
                   >
-                    View PDF
+                    ⬇️ Download
                   </a>
                 </td>
                 <td>
@@ -90,87 +203,49 @@ const handleLogout = async () => {
         </table>
       </div>
 
-{/* Modal */}
-{selectedApp && (
-  <div className={styles.modalOverlay} onClick={() => setSelectedApp(null)}>
-    <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
-      <div className={styles.modalHeader}>
-        <h2>
-          {selectedApp.fullName} <span>📄 Application Details</span>
-        </h2>
-        <button className={styles.closeBtn} onClick={() => setSelectedApp(null)}>✕</button>
-      </div>
-<div className={styles.modalGrid}>
-  <div className={styles.fieldBox}>
-    <span>📧 <strong>Email:</strong></span>
-    <p>{selectedApp.email}</p>
-  </div>
-  <div className={styles.fieldBox}>
-    <span>📞 <strong>Phone:</strong></span>
-    <p>{selectedApp.phone}</p>
-  </div>
+      {selectedApp && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedApp(null)}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>
+                {selectedApp.fullName} <span>📄 Application Details</span>
+              </h2>
+              <button className={styles.closeBtn} onClick={() => setSelectedApp(null)}>
+                ✕
+              </button>
+            </div>
+            <div className={styles.modalGrid}>
+              {Object.entries(selectedApp).map(([key, value]) => (
+                key !== "resumeUrl" && (
+                  <div
+                    key={key}
+                    className={styles.fieldBox + (key === "motivation" ? ` ${styles.longField}` : "")}
+                  >
+                    <span><strong>{key}:</strong></span>
+          <p>
+  {typeof value === "object" && value?.seconds
+    ? new Date(value.seconds * 1000).toLocaleString()
+    : String(value)}
+</p>
 
-  <div className={styles.fieldBox}>
-    <span>🏙️ <strong>City:</strong></span>
-    <p>{selectedApp.city}</p>
-  </div>
-  <div className={styles.fieldBox}>
-    <span>🗺️ <strong>State:</strong></span>
-    <p>{selectedApp.state}</p>
-  </div>
-
-  <div className={styles.fieldBox}>
-    <span>🎓 <strong>Qualification:</strong></span>
-    <p>{selectedApp.qualification}</p>
-  </div>
-  <div className={styles.fieldBox}>
-    <span>📊 <strong>Percentage:</strong></span>
-    <p>{selectedApp.percentage}</p>
-  </div>
-
-  <div className={styles.fieldBox}>
-    <span>🏫 <strong>Institution:</strong></span>
-    <p>{selectedApp.institution}</p>
-  </div>
-  <div className={styles.fieldBox}>
-    <span>📚 <strong>Program:</strong></span>
-    <p>{selectedApp.selectedProgram}</p>
-  </div>
-
-  <div className={styles.fieldBox}>
-    <span>🆔 <strong>Reference ID:</strong></span>
-    <p>{selectedApp.referenceId}</p>
-  </div>
-  <div className={styles.fieldBox}>
-    <span>📬 <strong>Postal Code:</strong></span>
-    <p>{selectedApp.postalCode}</p>
-  </div>
-
-  <div className={styles.fieldBox}>
-    <span>📍 <strong>Address:</strong></span>
-    <p>{selectedApp.address}</p>
-  </div>
-  <div className={styles.fieldBox + ' ' + styles.longField}>
-    <span>📝 <strong>Motivation:</strong></span>
-    <p>{selectedApp.motivation}</p>
-  </div>
-</div>
-
-
-      <div className={styles.modalFooter}>
-        <a
-          href={selectedApp.resumeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.resumeBtn}
-        >
-          View Resume
-        </a>
-      </div>
-    </div>
-  </div>
-)}
-
+                  </div>
+                )
+              ))}
+            </div>
+            <div className={styles.modalFooter}>
+              <a
+                href={selectedApp.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.resumeBtn}
+                download
+              >
+                View/Download Resume
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

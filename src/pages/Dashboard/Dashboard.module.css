@@ -79,6 +79,7 @@ tr:hover {
 
 .resumeLink:hover {
   background-color: #0078a4;
+  color: white !important;
 }
 
 .viewBtn {
@@ -333,4 +334,65 @@ tr:hover {
 
 .logoutBtn:hover {
   background-color: #e53935;
+}
+
+
+
+.searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 4px var(--primary);
+}
+
+.sortRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.sortSelect {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  transition: border-color 0.2s ease;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.downloadAllBtn {
+  background-color: #4caf50;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: 2rem;
+}
+
+.downloadAllBtn:hover {
+  background-color: #43a047;
 }
