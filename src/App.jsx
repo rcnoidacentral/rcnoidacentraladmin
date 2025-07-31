@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebaseConfig";
-
+// made by iamsuncoder
 const App = () => {
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(true);
