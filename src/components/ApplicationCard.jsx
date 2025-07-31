@@ -6,8 +6,13 @@ const ApplicationCard = ({ data }) => {
     <div className={styles.card}>
       <div className={styles.header}>
         <h2>{data.fullName}</h2>
-        <a href={data.resumeUrl} target="_blank" rel="noopener noreferrer" className={styles.resumeBtn}>
-          View Resume
+        <a
+          href={data.resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.resumeBtn}
+        >
+          📄 View Resume
         </a>
       </div>
 
@@ -17,20 +22,24 @@ const ApplicationCard = ({ data }) => {
         <div><strong>DOB:</strong> {data.dateOfBirth}</div>
         <div><strong>City:</strong> {data.city}</div>
         <div><strong>State:</strong> {data.state}</div>
-        <div><strong>Postal Code:</strong> {data.postalCode}</div>
         <div><strong>Qualification:</strong> {data.qualification}</div>
         <div><strong>Year of Completion:</strong> {data.yearOfCompletion}</div>
-        <div><strong>Percentage:</strong> {data.percentage}</div>
+        <div><strong>CGPA:</strong> {data.cgpa}</div>
         <div><strong>Experience:</strong> {data.experience}</div>
         <div><strong>Institution:</strong> {data.institution}</div>
-        <div><strong>Selected Program:</strong> {data.selectedProgram}</div>
+        <div><strong>Program:</strong> {data.program}</div>
         <div><strong>Reference ID:</strong> {data.referenceId}</div>
         <div className={styles.address}><strong>Address:</strong> {data.address}</div>
         <div className={styles.motivation}><strong>Motivation:</strong> {data.motivation}</div>
       </div>
 
       <div className={styles.footer}>
-        <small>Submitted on: {new Date(data.submittedAt?.seconds * 1000).toLocaleString()}</small>
+        <small>
+          Submitted on:{" "}
+          {data.submittedAt?.seconds
+            ? new Date(data.submittedAt.seconds * 1000).toLocaleString()
+            : "N/A"}
+        </small>
       </div>
     </div>
   );

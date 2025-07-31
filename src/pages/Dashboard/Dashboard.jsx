@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import styles from "./Dashboard.module.css";
 import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "../../firebaseConfig";
@@ -15,11 +16,28 @@ const Dashboard = () => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState("fullName");
-  const [selectedProgram, setSelectedProgram] = useState("");
+  const [program, setSelectedProgram] = useState("");
 
   const [sortOrder, setSortOrder] = useState("asc");
   const navigate = useNavigate();
+  const handleDownloadExcel = () => {
+    // Convert the filteredApps to a worksheet-friendly format
+    const exportData = filteredApps.map((app) => ({
+      "Full Name": app.fullName,
+      Email: app.email,
+      Phone: app.phone,
+      City: app.city,
+      program:
+        programNameMap[app.program] || app.program,
+      "Resume URL": app.resumeUrl,
+    }));
 
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Applications");
+
+    XLSX.writeFile(workbook, "Applications_Report.xlsx");
+  };
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
     try {
@@ -77,15 +95,15 @@ const Dashboard = () => {
 
     // Always sort by readable program name
     data.sort((a, b) => {
-      const nameA = programNameMap[a.selectedProgram] || "";
-      const nameB = programNameMap[b.selectedProgram] || "";
+      const nameA = programNameMap[a.program] || "";
+      const nameB = programNameMap[b.program] || "";
       return nameA.localeCompare(nameB);
     });
 
     setFilteredApps(data);
   }, [applications, search]);
   useEffect(() => {
-    const programOrder = ["flexi-mou", "b-voc", "d-voc", "nats", "naps"];
+    const programOrder = ["Flexi MOU", "B.Voc", "D.Voc", "NATS", "NAPS"];
 
     let data = [...applications];
 
@@ -98,19 +116,19 @@ const Dashboard = () => {
     }
 
     // Apply program filter if selected
-    if (selectedProgram) {
-      data = data.filter((app) => app.selectedProgram === selectedProgram);
+    if (program) {
+      data = data.filter((app) => app.program === program);
     }
 
     // Sort by predefined program order
     data.sort((a, b) => {
-      const indexA = programOrder.indexOf(a.selectedProgram);
-      const indexB = programOrder.indexOf(b.selectedProgram);
+      const indexA = programOrder.indexOf(a.program);
+      const indexB = programOrder.indexOf(b.program);
       return indexA - indexB;
     });
 
     setFilteredApps(data);
-  }, [applications, search, selectedProgram]);
+  }, [applications, search, program]);
 
   return (
     <div className={styles.dashboard}>
@@ -119,6 +137,12 @@ const Dashboard = () => {
         <div className={styles.buttonGroup}>
           <button className={styles.downloadAllBtn} onClick={handleDownloadAll}>
             ⬇️ Download All
+          </button>
+          <button
+            className={styles.downloadAllBtn}
+            onClick={handleDownloadExcel}
+          >
+            📊 Export to Excel
           </button>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             🔓 Logout
@@ -135,10 +159,10 @@ const Dashboard = () => {
       />
 
       <div className={styles.sortRow}>
-        <label htmlFor="programFilter">Filter by Program:</label>
+        <label htmlFor="programFilter">Filter by program:</label>
         <select
           id="programFilter"
-          value={selectedProgram}
+          value={program}
           onChange={(e) => setSelectedProgram(e.target.value)}
           className={styles.sortSelect}
         >
@@ -171,9 +195,7 @@ const Dashboard = () => {
                 <td>{app.email}</td>
                 <td>{app.phone}</td>
                 <td>{app.city}</td>
-                <td>
-                  {programNameMap[app.selectedProgram] || app.selectedProgram}
-                </td>
+                <td>{programNameMap[app.program] || app.program}</td>
 
                 <td>
                   <a
@@ -254,7 +276,6 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-
 
       <ContactQueries></ContactQueries>
     </div>
