@@ -1,3 +1,4 @@
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -74,4 +75,12 @@ button:focus-visible {
 
 *::-webkit-scrollbar {
   display: none;                   /* Chrome, Safari, Opera */
+}
+
+
+/* Hide toaster on tablets & mobile */
+@media (max-width: 1024px) {
+  .react-hot-toast {
+    display: none !important;
+  }
 }
