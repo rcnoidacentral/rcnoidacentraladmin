@@ -1,15 +1,4 @@
 services:
   web:
     build: .
-    # ports:
-    #   - "3000:90"
-    # volumes:
-    #   - ./nginx.conf:/etc/nginx/conf.d/default.conf
     restart: unless-stopped
-  # web :
-  #   build : .
-  #   ports :
-  #     - "3012:3012"
-
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf   
