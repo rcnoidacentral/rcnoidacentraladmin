@@ -56,8 +56,8 @@ export const downloadExcel = (applications, statusFilter = "all") => {
   "Last Updated": formatDate(app.updatedAt),
   "Resume File": app.resume?.fileName || "N/A",
   "Resume URL": app.resume?.url || "N/A",
-  "Offer letter": app.offerLetter.url || "N/A",
-  "Motivation": app.motivation || "N/A",
+  "Offer letter": app.offerLetter?.url || "N/A",
+  "Motivation": app?.motivation || "N/A",
 }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
