@@ -8,24 +8,22 @@ export const useApplications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchApplications = async () => {
+    try {
+      const res = await adminApiService.getAllApplications();
+      setApplications(res.data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load applications");
+      toast.error("Failed to load applications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let mounted = true;
+    // let mounted = true;
 
-    const fetchApplications = async () => {
-      try {
-        const res = await adminApiService.getAllApplications();
-
-        if (mounted) {
-          setApplications(res.data);
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load applications");
-        toast.error("Failed to load applications");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
 
     fetchApplications();
 
@@ -33,12 +31,12 @@ export const useApplications = () => {
     const interval = setInterval(fetchApplications, 30000);
 
     return () => {
-      mounted = false;
+      // mounted = false;
       clearInterval(interval);
     };
   }, []);
 
-  return { applications, loading, error };
+  return { applications, loading, error,    refetch: fetchApplications };
 };
 
 export const useApplicationFilters = (applications) => {

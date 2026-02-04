@@ -1,5 +1,6 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { Toaster } from "react-hot-toast";
 import "./index.css";
 import App from "./App.jsx";
 
@@ -39,9 +40,8 @@ const Root = () => {
       setIsDesktop(window.innerWidth > 1024);
     };
 
-    checkScreen(); // run once
+    checkScreen();
     window.addEventListener("resize", checkScreen);
-
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
@@ -50,6 +50,17 @@ const Root = () => {
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    {/* 🔥 MUST BE HERE */}
+    <Toaster
+      position="top-right"
+      toastOptions={{
+        duration: 3000,
+        style: {
+          zIndex: 99999,
+        },
+      }}
+    />
+
     <Root />
   </StrictMode>
 );

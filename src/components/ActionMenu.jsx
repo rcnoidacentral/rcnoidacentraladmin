@@ -1,4 +1,3 @@
-// components/ActionMenu.jsx
 import React, { useRef, useEffect } from "react";
 import styles from "../pages/Dashboard/Dashboard.module.css";
 import { APPLICATION_STATUS } from "../constants/programConstants";
@@ -10,14 +9,17 @@ const ActionMenu = ({
   onStatusChange,
   onClose,
 }) => {
+  const wrapperRef = useRef(null);
   const menuRef = useRef(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     if (!isActive) return;
 
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target)
+      ) {
         onClose();
       }
     };
@@ -37,7 +39,8 @@ const ActionMenu = ({
     };
   }, [isActive, onClose]);
 
-  const currentStatus = application.status || APPLICATION_STATUS.SUBMITTED;
+  const currentStatus =
+    application.status || APPLICATION_STATUS.SUBMITTED;
 
   const actions = [
     {
@@ -66,35 +69,43 @@ const ActionMenu = ({
     },
   ];
 
-  const handleActionClick = async (actionValue) => {
-    if (onStatusChange) {
-      await onStatusChange(application._id || application.id, actionValue);
-    }
+  const handleActionClick = async (value) => {
+    await onStatusChange(
+      application._id || application.id,
+      value
+    );
   };
 
   return (
-    <div className={styles.actionMenuWrapper} ref={menuRef}>
+    <div
+      ref={wrapperRef}
+      className={`${styles.actionMenuWrapper} ${
+        isActive ? styles.actionMenuWrapperActive : ""
+      }`}
+    >
       <button
         className={styles.actionMenuBtn}
-        onClick={onToggle}
-        title="More actions"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
         aria-expanded={isActive}
-        aria-haspopup="true"
       >
         ⚙️ Actions {isActive ? "▲" : "▼"}
       </button>
 
       {isActive && (
-        <div className={styles.actionMenu} role="menu">
-          <div className={styles.actionMenuHeader}>Change Status</div>
+        <div ref={menuRef} className={styles.actionMenu}>
+          <div className={styles.actionMenuHeader}>
+            Change Status
+          </div>
 
           {actions.map((action) => (
             <button
               key={action.value}
               className={styles.actionMenuItem}
-              onClick={() => handleActionClick(action.value)}
               disabled={action.disabled}
-              role="menuitem"
+              onClick={() => handleActionClick(action.value)}
               style={{
                 color: action.disabled ? "#999" : action.color,
                 cursor: action.disabled ? "not-allowed" : "pointer",

@@ -129,6 +129,7 @@ const Dashboard = () => {
         <ApplicationModal
           application={selectedApp}
           onClose={handleModalClose}
+            onStatusUpdated={refetch} // ✅ pass refetch
         />
       )}
 
